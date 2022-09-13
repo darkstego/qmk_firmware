@@ -6,7 +6,7 @@ The following are the bindings being implemented in this repo.
 
 It also provides the `ESC` key on Left `ALT` tapping.
 
-The code implements them on the keymap for the `Keychron Q5` specifically the `q5_ansi_stm32l432_ec11`
+The code implements them on the `wakib` keymap for the `Keychron Q5` specifically the `q5_ansi_stm32l432_ec11`
 
 This allows the use of these bindings on most applications by mapping them to standard shortcuts.
 
