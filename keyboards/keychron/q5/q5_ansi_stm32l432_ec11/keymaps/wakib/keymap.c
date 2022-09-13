@@ -468,7 +468,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             // Wakib keys without shift version
             if (record->event.pressed) {
                 // ignore if Win/Super is held
-                if (!wakib_state || (mod_state & MOD_BIT(KC_LWIN))) {
+                if (!wakib_state || (mod_state & (MOD_BIT(KC_LWIN) | MOD_BIT(KC_LCTL)))) {
                     return true;
                 }
                 if (!(mod_state & MOD_BIT(KC_LALT))) {
@@ -491,7 +491,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             // Wakib keys with shift version
             if (record->event.pressed) {
                 // ignore if Win/Super is held
-                if (!wakib_state || (mod_state & MOD_BIT(KC_LWIN))) {
+                if (!wakib_state || (mod_state & (MOD_BIT(KC_LWIN) | MOD_BIT(KC_LCTL)))) {
                     return true;
                 }
                 if (!(mod_state & MOD_BIT(KC_LALT))) {
