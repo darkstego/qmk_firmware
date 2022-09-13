@@ -52,17 +52,19 @@ enum wakib_tracker_codes {
     WAKIB_DOWN,
     WAKIB_WORD_LEFT,
     WAKIB_WORD_RIGHT,
+    WAKIB_NEXT,
     WAKIB_PGUP,
     WAKIB_PGDOWN,
     WAKIB_TAB_PREV,
     WAKIB_TAB_NEXT,
     WAKIB_LINE_START,
     WAKIB_LINE_END,
+    WAKIB_PREVIOUS,
 };
 
 
-#define WAKIB_KEY_COUNT 16
-#define WAKIB_SHIFT_KEY_COUNT 6
+#define WAKIB_KEY_COUNT 18
+#define WAKIB_SHIFT_KEY_COUNT 7
 bool wakib_tracker[WAKIB_KEY_COUNT] = {false};
 bool wakib_state = false;
 
@@ -93,7 +95,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,    KC_RBRC,  KC_BSLS,            KC_PGUP,    KC_HOME,    KC_END,
         KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,              KC_ENT,             KC_PGDN,    KC_UP,    KC_PAUS,    KC_PPLS,
         KC_LSFT,            KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,              KC_RSFT,  KC_UP,    KC_LEFT,    KC_DOWN,    KC_RIGHT,
-        KC_LCTL,  KC_LWIN,  KC_LALT,                                KC_SPC,                                 KC_RALT,  MO(L_FN), KC_RCTL,  KC_LEFT,  KC_DOWN,  KC_RGHT,  KC_P0,    KC_PDOT,  KC_PENT),
+        KC_LCTL,  KC_LWIN,  LALT_T(KC_ESC),                            KC_SPC,                                 KC_RALT,  MO(L_FN), KC_RCTL,  KC_LEFT,  KC_DOWN,  KC_RGHT,  KC_P0,    KC_PDOT,  KC_PENT),
     [L_NUMLOCK] = LAYOUT_ansi_98(
         _______,            _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,    _______,  _______,            _______,  _______,  _______,  _______,
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,    _______,  _______,            _______,  _______,  _______,  _______,
@@ -156,6 +158,10 @@ void register_wakib_code(uint16_t keycode){
         register_code(KC_LCTL);
         register_code(KC_RIGHT);
         break;
+    case KC_SCLN:
+        wakib_tracker[WAKIB_NEXT] = true;
+        register_code(KC_F3);
+        break;
     }
 }
 
@@ -186,6 +192,11 @@ void register_wakib_shift_code(uint16_t keycode){
     case KC_O:
         wakib_tracker[WAKIB_LINE_END] = true;
         register_code(KC_END);
+        break;
+    case KC_SCLN:
+        wakib_tracker[WAKIB_PREVIOUS] = true;
+        register_code(KC_RSFT);
+        register_code(KC_F3);
         break;
     }
 }
@@ -298,6 +309,19 @@ bool unregister_wakib_code(uint16_t keycode) {
             return false;
         }
         break;
+    case KC_SCLN:
+        if (wakib_tracker[WAKIB_NEXT]) {
+            wakib_tracker[WAKIB_NEXT] = false;
+            unregister_code(KC_F3);
+            return false;
+        }
+        if (wakib_tracker[WAKIB_PREVIOUS]) {
+            wakib_tracker[WAKIB_PREVIOUS] = false;
+            unregister_code(KC_F3);
+            unregister_code(KC_RSFT);
+            return false;
+        }
+        break;
     }
     return true;
 }
@@ -361,6 +385,13 @@ void unregister_all_wakib_codes(uint8_t start) {
             case WAKIB_PGDOWN:
                 unregister_code(KC_PGDN);
                 break;
+            case WAKIB_NEXT:
+                unregister_code(KC_F3);
+                break;
+            case WAKIB_PREVIOUS:
+                unregister_code(KC_F3);
+                unregister_code(KC_RSFT);
+                break;
             }
         }
     }
@@ -410,8 +441,26 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case KC_WAKB:
             if (record->event.pressed) {
                 wakib_state = !wakib_state;
+                if (wakib_state) {
+                    for (uint8_t i=0; i<5; i++) {
+                        rgblight_increase_hue_noeeprom();
+                    }
+                } else {
+                    for (uint8_t i=0; i<5; i++) {
+                        rgblight_decrease_hue_noeeprom();
+                    }
+                }
             }
             return false;  // Skip all further processing of this key
+        case TG(L_NUMLOCK):
+            if (record->event.pressed) {
+                if (layer_state_is(L_NUMLOCK)) {
+                    rgblight_step_reverse_noeeprom();
+                } else {
+                    rgblight_step_noeeprom();
+                }
+            }
+            return true;
         case KC_D:
         case KC_F:
         case KC_E:
@@ -437,6 +486,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case KC_L:
         case KC_U:
         case KC_O:
+        case KC_SCLN:
             // Wakib keys with shift version
             if (record->event.pressed) {
                 if (!wakib_state) {
