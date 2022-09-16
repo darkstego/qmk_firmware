@@ -457,6 +457,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 if (layer_state_is(L_NUMLOCK)) {
                     rgblight_step_reverse_noeeprom();
                 } else {
+                    // always enable numlock when layer will become numlock
+                    if (!host_keyboard_led_state().num_lock) {
+                        register_code(KC_NLCK);
+                        unregister_code(KC_NLCK);
+                    }
                     rgblight_step_noeeprom();
                 }
             }
