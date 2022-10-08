@@ -484,7 +484,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 set_mods(mod_state);
                 return false;
             } else {
-                return unregister_wakib_code(keycode);
+                if (mod_state & MOD_BIT(KC_LALT)) {
+                    del_mods(MOD_BIT(KC_LALT));
+                }
+                uint8_t result = unregister_wakib_code(keycode);
+                set_mods(mod_state);
+                return result;
             }
         case KC_I:
         case KC_J:
@@ -514,7 +519,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     return false;
                 }
             } else {
-                return unregister_wakib_code(keycode);
+                if (mod_state & MOD_BIT(KC_LALT)) {
+                    del_mods(MOD_BIT(KC_LALT));
+                }
+                uint8_t result = unregister_wakib_code(keycode);
+                set_mods(mod_state);
+                return result;
             }
         case KC_LALT: // Left Alt
             if (!record->event.pressed) {
