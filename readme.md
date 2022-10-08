@@ -10,6 +10,16 @@ The code implements them on the `wakib` keymap for the `Keychron Q5` specificall
 
 This allows the use of these bindings on most applications by mapping them to standard shortcuts.
 
+## How to install
+
+Test that code compiles with 
+
+`qmk compile -kb keychron/q5/q5_ansi_stm32l432_ec11 -km wakib`
+
+Then flash (also compiles)
+
+`qmk flash -kb keychron/q5/q5_ansi_stm32l432_ec11 -km wakib`
+
 
 ## Official Website
 
