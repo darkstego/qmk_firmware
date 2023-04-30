@@ -15,6 +15,7 @@
  */
 
 #include QMK_KEYBOARD_H
+#include "keychron_common.h"
 
 // clang-format off
 
@@ -24,16 +25,8 @@ enum layers{
   L_FN
 };
 
-enum custom_keycodes {
-    KC_MISSION_CONTROL = SAFE_RANGE,
-    KC_LAUNCHPAD,
-    KC_LOPTN,
-    KC_ROPTN,
-    KC_LCMMD,
-    KC_RCMMD,
-    KC_TASK_VIEW,
-    KC_FILE_EXPLORER,
-    KC_WAKIB_TOGGLE,
+enum wakib_keycodes {
+    KC_WAKIB_TOGGLE = SAFE_RANGE,
 };
 
 
@@ -70,23 +63,7 @@ bool wakib_state = false;
 
 uint8_t mod_state;
 
-#define KC_MCTL KC_MISSION_CONTROL
-#define KC_LPAD KC_LAUNCHPAD
-#define KC_TASK KC_TASK_VIEW
-#define KC_FLXP KC_FILE_EXPLORER
 #define KC_WAKB KC_WAKIB_TOGGLE
-
-typedef struct PACKED {
-    uint8_t len;
-    uint8_t keycode[3];
-} key_combination_t;
-
-key_combination_t key_comb_list[2] = {
-    {2, {KC_LWIN, KC_TAB}},
-    {2, {KC_LWIN, KC_E}}
-};
-
-static uint8_t mac_keycode[4] = { KC_LOPT, KC_ROPT, KC_LCMD, KC_RCMD };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [L_BASE] = LAYOUT_ansi_98(
@@ -111,6 +88,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______,            _______,  _______,  _______,  _______,  _______,  NK_TOGG,  _______,  _______,  _______,  _______,              _______,  _______,  _______,  _______,  _______,
         _______,  _______,  _______,                                _______,                                _______,  _______,     KC_APP,  _______,  _______,  _______,  _______,  _______,  _______),
 };
+
+
+#if defined(ENCODER_MAP_ENABLE)
+const uint16_t PROGMEM encoder_map[][1][2] = {
+    [L_BASE] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
+    [L_FN]   = {ENCODER_CCW_CW(RGB_VAD, RGB_VAI) },
+    [L_NUMLOCK] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
+};
+#endif
+
 
 void register_wakib_code(uint16_t keycode){
     switch (keycode) {
@@ -402,42 +389,6 @@ void unregister_all_wakib_codes(uint8_t start) {
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     mod_state = get_mods();
     switch (keycode) {
-        case KC_MISSION_CONTROL:
-            if (record->event.pressed) {
-                host_consumer_send(0x29F);
-            } else {
-                host_consumer_send(0);
-            }
-            return false;  // Skip all further processing of this key
-        case KC_LAUNCHPAD:
-            if (record->event.pressed) {
-                host_consumer_send(0x2A0);
-            } else {
-                host_consumer_send(0);
-            }
-            return false;  // Skip all further processing of this key
-        case KC_LOPTN:
-        case KC_ROPTN:
-        case KC_LCMMD:
-        case KC_RCMMD:
-            if (record->event.pressed) {
-                register_code(mac_keycode[keycode - KC_LOPTN]);
-            } else {
-                unregister_code(mac_keycode[keycode - KC_LOPTN]);
-            }
-            return false;  // Skip all further processing of this key
-        case KC_TASK:
-        case KC_FLXP:
-            if (record->event.pressed) {
-                for (uint8_t i = 0; i < key_comb_list[keycode - KC_TASK].len; i++) {
-                    register_code(key_comb_list[keycode - KC_TASK].keycode[i]);
-                }
-            } else {
-                for (uint8_t i = 0; i < key_comb_list[keycode - KC_TASK].len; i++) {
-                    unregister_code(key_comb_list[keycode - KC_TASK].keycode[i]);
-                }
-            }
-            return false;  // Skip all further processing of this key
         case KC_WAKB:
             if (record->event.pressed) {
                 wakib_state = !wakib_state;
@@ -459,8 +410,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 } else {
                     // always enable numlock when layer will become numlock
                     if (!host_keyboard_led_state().num_lock) {
-                        register_code(KC_NLCK);
-                        unregister_code(KC_NLCK);
+                        register_code(KC_NUM);
+                        unregister_code(KC_NUM);
                     }
                     rgblight_step_noeeprom();
                 }
