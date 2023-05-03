@@ -2,7 +2,11 @@
 
 The following are the bindings being implemented in this repo.
 
+![wakib-q5-v1](https://user-images.githubusercontent.com/2610287/236075575-2ab9a91c-dde5-4a90-b16e-84de7bc15338.png)
+
 It also provides the `ESC` key on Left `ALT` double-tapping, and Caps Lock uses Caps Word (auto-off after word).
+
+The numpad has also been rearranged to make it easier to use without the need for dedicated arrow keys.
 
 The code implements them on the `wakib` keymap for the `Keychron Q5` specifically the `ansi_encoder`
 
