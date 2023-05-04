@@ -1,4 +1,5 @@
-# This is a QMK firmware that implements Wakib keybinding.
+<h2 align="center"><img src="https://user-images.githubusercontent.com/2610287/236253542-ab75c56d-0bbc-457a-8587-d5d2c78d0eb3.svg" height="128"><br>Wakib QMK Keyboard</h2>
+
 
 The following are the bindings being implemented in this repo.
 
