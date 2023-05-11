@@ -5,15 +5,13 @@ The following are the bindings being implemented in this repo.
 
 ![wakib-q5-v1](https://user-images.githubusercontent.com/2610287/236075575-2ab9a91c-dde5-4a90-b16e-84de7bc15338.png)
 
+The code implements the Wakib shortcuts on the `wakib` keymap for the `Keychron Q5` specifically the `ansi_encoder`. This allows the use of these bindings on most applications by mapping them to standard shortcuts.
+
+Other changes include the numpad rearranged to make it easier to use without the need for dedicated arrow keys.
+
 It also provides the `ESC` key on Left `ALT` double-tapping, and Caps Lock uses Caps Word (auto-off after word).
 
-The numpad has also been rearranged to make it easier to use without the need for dedicated arrow keys.
-
-The code implements them on the `wakib` keymap for the `Keychron Q5` specifically the `ansi_encoder`
-
-This allows the use of these bindings on most applications by mapping them to standard shortcuts.
-
-If you find these keybindings interesting, please look at other options with similar keybindings at the [Wakib Project](https://github.com/darkstego/wakib-project)
+If you find the Wakib keybindings interesting, please look at other options with similar keybindings at the [Wakib Project](https://github.com/darkstego/wakib-project)
 
 ## Shortcut list
 
@@ -58,7 +56,7 @@ Then flash (also compiles)
 
 `qmk flash -kb keychron/q5/ansi_encoder -km wakib`
 
-Remember that you should reset the keyboard before and after you complete the flashing. To reset you simply hold the ESC button while plugging the cable on to the keyboard. 
+For flashing simply hold the ESC button while plugging the cable on to the keyboard. 
 
 
 ## Official Website
