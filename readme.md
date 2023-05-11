@@ -44,9 +44,9 @@ This is a list of the basic Wakib shortcuts mapped to their counterpart in commo
 
 ## How to install
 
-The implementation is added as a keymap to the Keychron Q5 Keyboard ANSI_encoder version. To use another keyboard you should copy the code in that keymap.c and rules.mk and adjust to your keyboard. 
+The implementation is added as a keymap to the Keychron Q5 Keyboard ANSI_encoder version. To use another keyboard you should check the readme under `users\darkstego` for implementing the Wakib portion.
 
-The essential parts to be copied over are those that include the word "Wakib" as well as the `process_record_user` section. 
+The other features are implemented directly in the keymap.
 
 ### Keychron Q5 Install example 
 
