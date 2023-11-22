@@ -16,6 +16,7 @@ enum wakib_tracker_codes {
     WAKIB_WORD_LEFT,
     WAKIB_WORD_RIGHT,
     WAKIB_NEXT,
+    WAKIB_SELECT,
     WAKIB_PGUP,
     WAKIB_PGDOWN,
     WAKIB_TAB_PREV,
@@ -26,10 +27,13 @@ enum wakib_tracker_codes {
 };
 
 
-#define WAKIB_KEY_COUNT 18
+#define WAKIB_KEY_COUNT 19
 #define WAKIB_SHIFT_KEY_COUNT 7
 bool wakib_tracker[WAKIB_KEY_COUNT] = {false};
 bool wakib_state = false;
+
+bool wakib_ongoing = false;
+bool wakib_shift_ongoing = false;
 
 uint8_t mod_state;
 
@@ -50,12 +54,12 @@ void register_wakib_code(uint16_t keycode){
         break;
     case KC_E:
         wakib_tracker[WAKIB_WORD_BACKSPACE] = true;
-        register_code(KC_LCTL);
+        register_code(KC_RCTL);
         register_code(KC_BSPC);
         break;
     case KC_R:
         wakib_tracker[WAKIB_WORD_DELETE] = true;
-        register_code(KC_LCTL);
+        register_code(KC_RCTL);
         register_code(KC_DEL);
         break;
     case KC_I:
@@ -76,17 +80,26 @@ void register_wakib_code(uint16_t keycode){
         break;
     case KC_U:
         wakib_tracker[WAKIB_WORD_LEFT] = true;
-        register_code(KC_LCTL);
+        register_code(KC_RCTL);
         register_code(KC_LEFT);
         break;
     case KC_O:
         wakib_tracker[WAKIB_WORD_RIGHT] = true;
-        register_code(KC_LCTL);
+        register_code(KC_RCTL);
         register_code(KC_RIGHT);
         break;
     case KC_SCLN:
         wakib_tracker[WAKIB_NEXT] = true;
         register_code(KC_F3);
+        break;
+    case KC_S:
+        if (wakib_tracker[WAKIB_SELECT]) {
+            unregister_code(KC_RSFT);
+        }
+        else {
+            register_code(KC_RSFT);
+        }
+        wakib_tracker[WAKIB_SELECT] = !wakib_tracker[WAKIB_SELECT];
         break;
     }
 }
@@ -99,7 +112,7 @@ void register_wakib_shift_code(uint16_t keycode){
         break;
     case KC_J:
         wakib_tracker[WAKIB_TAB_PREV] = true;
-        register_code(KC_LCTL);
+        register_code(KC_RCTL);
         register_code(KC_PGUP);
         break;
     case KC_K:
@@ -108,7 +121,7 @@ void register_wakib_shift_code(uint16_t keycode){
         break;
     case KC_L:
         wakib_tracker[WAKIB_TAB_NEXT] = true;
-        register_code(KC_LCTL);
+        register_code(KC_RCTL);
         register_code(KC_PGDN);
         break;
     case KC_U:
@@ -147,7 +160,7 @@ bool unregister_wakib_code(uint16_t keycode) {
         if (wakib_tracker[WAKIB_WORD_BACKSPACE]) {
             wakib_tracker[WAKIB_WORD_BACKSPACE] = false;
             unregister_code(KC_BSPC);
-            unregister_code(KC_LCTL);
+            unregister_code(KC_RCTL);
             return false;
         }
         break;
@@ -155,7 +168,7 @@ bool unregister_wakib_code(uint16_t keycode) {
         if (wakib_tracker[WAKIB_WORD_DELETE]) {
             wakib_tracker[WAKIB_WORD_DELETE] = false;
             unregister_code(KC_DEL);
-            unregister_code(KC_LCTL);
+            unregister_code(KC_RCTL);
             return false;
         }
         break;
@@ -179,7 +192,7 @@ bool unregister_wakib_code(uint16_t keycode) {
         }
         if (wakib_tracker[WAKIB_TAB_PREV]) {
             wakib_tracker[WAKIB_TAB_PREV] = false;
-            unregister_code(KC_LCTL);
+            unregister_code(KC_RCTL);
             unregister_code(KC_PGUP);
             return false;
         }
@@ -204,7 +217,7 @@ bool unregister_wakib_code(uint16_t keycode) {
         }
         if (wakib_tracker[WAKIB_TAB_NEXT]) {
             wakib_tracker[WAKIB_TAB_NEXT] = false;
-            unregister_code(KC_LCTL);
+            unregister_code(KC_RCTL);
             unregister_code(KC_PGDN);
             return false;
         }
@@ -213,7 +226,7 @@ bool unregister_wakib_code(uint16_t keycode) {
         if (wakib_tracker[WAKIB_WORD_LEFT]) {
             wakib_tracker[WAKIB_WORD_LEFT] = false;
             unregister_code(KC_LEFT);
-            unregister_code(KC_LCTL);
+            unregister_code(KC_RCTL);
             return false;
         }
         if (wakib_tracker[WAKIB_LINE_START]) {
@@ -226,7 +239,7 @@ bool unregister_wakib_code(uint16_t keycode) {
         if (wakib_tracker[WAKIB_WORD_RIGHT]) {
             wakib_tracker[WAKIB_WORD_RIGHT] = false;
             unregister_code(KC_RIGHT);
-            unregister_code(KC_LCTL);
+            unregister_code(KC_RCTL);
             return false;
         }
         if (wakib_tracker[WAKIB_LINE_END]) {
@@ -248,6 +261,11 @@ bool unregister_wakib_code(uint16_t keycode) {
             return false;
         }
         break;
+    case KC_S:
+        if (wakib_tracker[WAKIB_SELECT]) {
+            return false;
+        }
+        break;
     }
     return true;
 }
@@ -265,11 +283,11 @@ void unregister_all_wakib_codes(uint8_t start) {
                 break;
             case WAKIB_WORD_BACKSPACE:
                 unregister_code(KC_BSPC);
-                unregister_code(KC_LCTL);
+                unregister_code(KC_RCTL);
                 break;
             case WAKIB_WORD_DELETE:
                 unregister_code(KC_DEL);
-                unregister_code(KC_LCTL);
+                unregister_code(KC_RCTL);
                 break;
             case WAKIB_UP:
                 unregister_code(KC_UP);
@@ -285,11 +303,11 @@ void unregister_all_wakib_codes(uint8_t start) {
                 break;
             case WAKIB_WORD_LEFT:
                 unregister_code(KC_LEFT);
-                unregister_code(KC_LCTL);
+                unregister_code(KC_RCTL);
                 break;
             case WAKIB_WORD_RIGHT:
                 unregister_code(KC_RIGHT);
-                unregister_code(KC_LCTL);
+                unregister_code(KC_RCTL);
                 break;
             case WAKIB_LINE_START:
                 unregister_code(KC_HOME);
@@ -298,11 +316,11 @@ void unregister_all_wakib_codes(uint8_t start) {
                 unregister_code(KC_END);
                 break;
             case WAKIB_TAB_PREV:
-                unregister_code(KC_LCTL);
+                unregister_code(KC_RCTL);
                 unregister_code(KC_PGUP);
                 break;
             case WAKIB_TAB_NEXT:
-                unregister_code(KC_LCTL);
+                unregister_code(KC_RCTL);
                 unregister_code(KC_PGDN);
                 break;
             case WAKIB_PGUP:
@@ -318,6 +336,9 @@ void unregister_all_wakib_codes(uint8_t start) {
                 unregister_code(KC_F3);
                 unregister_code(KC_RSFT);
                 break;
+            case WAKIB_SELECT:
+                unregister_code(KC_RSFT);
+                break;
             }
         }
     }
@@ -326,37 +347,37 @@ void unregister_all_wakib_codes(uint8_t start) {
 
 bool process_record_wakib(uint16_t keycode, keyrecord_t *record) {
     mod_state = get_mods();
+    if ((keycode == KC_WAKIB_TOGGLE) && (record->event.pressed)) {
+        wakib_state = !wakib_state;
+        return true;
+    }
+    // igonre if Win/Super or Left CTRL is pressed
+    if (!wakib_state || (mod_state & (MOD_BIT(KC_LWIN) | MOD_BIT(KC_LCTL)))) {
+        return true;
+    }
     switch (keycode) {
-        case KC_WAKIB_TOGGLE:
-            if (record->event.pressed) {
-                wakib_state = !wakib_state;
-            }
-            return true;
         case KC_D:
         case KC_F:
         case KC_E:
         case KC_R:
+        case KC_S:
             // Wakib keys without shift version
             if (record->event.pressed) {
-                // ignore if Win/Super is held
-                if (!wakib_state || (mod_state & (MOD_BIT(KC_LWIN) | MOD_BIT(KC_LCTL)))) {
+                if ((mod_state & MOD_BIT(KC_LALT))) {
+                    unregister_code(KC_LALT);
+                    // one more time to get out of electron menubar
+                    tap_code(KC_LALT);
+                    wakib_ongoing = true;
+                }
+                if (!wakib_ongoing) {
                     return true;
                 }
-                if (!(mod_state & MOD_BIT(KC_LALT))) {
-                    return true;
-                }
-                del_mods(MOD_BIT(KC_LALT));
                 register_wakib_code(keycode);
-                set_mods(mod_state);
                 return false;
             } else {
-                if (mod_state & MOD_BIT(KC_LALT)) {
-                    del_mods(MOD_BIT(KC_LALT));
-                }
-                uint8_t result = unregister_wakib_code(keycode);
-                set_mods(mod_state);
-                return result;
+                return unregister_wakib_code(keycode);
             }
+            break;
         case KC_I:
         case KC_J:
         case KC_K:
@@ -366,47 +387,67 @@ bool process_record_wakib(uint16_t keycode, keyrecord_t *record) {
         case KC_SCLN:
             // Wakib keys with shift version
             if (record->event.pressed) {
-                // ignore if Win/Super is held
-                if (!wakib_state || (mod_state & (MOD_BIT(KC_LWIN) | MOD_BIT(KC_LCTL)))) {
-                    return true;
+                if ((mod_state & MOD_BIT(KC_LALT))) {
+                    unregister_code(KC_LALT);
+                    // one more time to get out of electron menubar
+                    tap_code(KC_LALT);
+                    wakib_ongoing = true;
                 }
-                if (!(mod_state & MOD_BIT(KC_LALT))) {
-                    return true;
-                }
-                del_mods(MOD_BIT(KC_LALT));
-                if (mod_state & MOD_BIT(KC_LSFT)) {
+                if (wakib_ongoing && (mod_state & MOD_BIT(KC_LSFT))) {
                     del_mods(MOD_BIT(KC_LSFT));
+                    wakib_shift_ongoing = true;
+                }
+                if (wakib_shift_ongoing) {
                     register_wakib_shift_code(keycode);
-                    set_mods(mod_state);
                     return false;
-                } else {
+                }
+                else if (wakib_ongoing) {
                     register_wakib_code(keycode);
-                    set_mods(mod_state);
                     return false;
                 }
             } else {
-                if (mod_state & MOD_BIT(KC_LALT)) {
-                    del_mods(MOD_BIT(KC_LALT));
-                }
-                uint8_t result = unregister_wakib_code(keycode);
-                set_mods(mod_state);
-                return result;
+                return unregister_wakib_code(keycode);
             }
+            break;
         case KC_LALT: // Left Alt
             if (!record->event.pressed) {
-                if (wakib_state) {
-                    unregister_all_wakib_codes(0);
+                wakib_ongoing = false;
+                // Revert shift if alt released first
+                if (wakib_shift_ongoing) {
+                    add_mods(MOD_BIT(KC_LSFT));
                 }
+                wakib_shift_ongoing = false;
+                unregister_all_wakib_codes(0);
             }
             return true;
+            break;
         case KC_LSFT: // Left Shift
             if (!record->event.pressed) {
-                if (wakib_state) {
+                if (wakib_ongoing) {
+                    wakib_shift_ongoing = false;
                     unregister_all_wakib_codes(WAKIB_KEY_COUNT - WAKIB_SHIFT_KEY_COUNT);
                 }
             }
             return true;
+            break;
+        case KC_RSFT:
+        case KC_RALT:
+            return true;
+            break;
         default:
+            if (wakib_tracker[WAKIB_SELECT]) {
+                wakib_tracker[WAKIB_SELECT] = false;
+                unregister_code(KC_RSFT);
+            }
+            if (wakib_shift_ongoing) {
+                add_mods(MOD_BIT(KC_LSFT));
+                wakib_shift_ongoing = false;
+            }
+            if (wakib_ongoing) {
+                add_mods(MOD_BIT(KC_LALT));
+                wakib_ongoing = false;
+            }
             return true;  // Process all other keycodes normally
     }
+    return true;
 }
